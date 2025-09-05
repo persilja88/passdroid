@@ -139,8 +139,8 @@ public class Session {
             am.cancel(session.timeoutIntent);
             session.timeoutIntent = null;
         }
-        
-        session.timeoutIntent = PendingIntent.getBroadcast(context, 0, new Intent(TIMEOUT_ACTION), PendingIntent.FLAG_ONE_SHOT);
+
+        session.timeoutIntent = PendingIntent.getBroadcast(context, 0, new Intent(TIMEOUT_ACTION), PendingIntent.FLAG_IMMUTABLE);
         am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 5000, session.timeoutIntent);
     }
 

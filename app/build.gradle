@@ -1,13 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    namespace "com.kodholken.passdroid"
+    compileSdkVersion 34
+    buildToolsVersion "34.0.0"
 
     defaultConfig {
         applicationId "com.kodholken.passdroid"
         minSdkVersion 24
-        targetSdkVersion 28
+        targetSdkVersion 34
     }
 
     buildTypes {
