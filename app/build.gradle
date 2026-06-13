@@ -3,11 +3,11 @@ plugins {
 }
 android {
     namespace "com.kodholken.passdroid"
-    compileSdk 34
+    compileSdk 24
     defaultConfig {
         applicationId "com.kodholken.passdroid"
         minSdk 24
-        targetSdk 34
+        targetSdk 24
         versionCode 24
         versionName "2.3.1"
     }

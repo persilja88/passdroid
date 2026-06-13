@@ -289,9 +289,9 @@ public class GeneratePasswordActivity extends TimeoutActivity {
             public void onClick(View v) {
                 Intent result = new Intent(
                 "com.kodholken.passdroid.PASSWORD_RESULT_ACTION");
+                generatePassword();
                 ri.putExtra("password", "new value");
                 result.putExtra("password", generatedPassword);
-                generatePassword();
                 if (displayPassword) {
                     Intent generateIntent = new Intent(context,
                             DisplayPasswordActivity.class);
