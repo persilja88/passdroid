@@ -1,9 +1,9 @@
-plugins {
-    id 'com.android.application'
-}
+apply plugin: 'com.android.application'
+
 android {
-    namespace "com.kodholken.passdroid"
-    compileSdk 24
+    compileSdkVersion 24
+    buildToolsVersion "26.0.2"
+
     defaultConfig {
         applicationId "com.kodholken.passdroid"
         minSdk 24
