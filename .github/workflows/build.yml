@@ -1,30 +1,102 @@
-name: Android Build APK Engine
+name: Android Build & Cloud Test
 
 on:
-  workflow_dispatch: # Allows manual button-click triggers
+  workflow_dispatch:
+    inputs:
+      passdroid_password:
+        description: 'Your Passdroid Master Password (for cloud verification test)'
+        required: true
+        type: string
+      backup_filename:
+        description: 'Exact name of the file you uploaded (e.g., backup.xml.enc)'
+        required: true
+        default: 'backup.xml.enc'
+        type: string
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
-      - name: Pull Source Code
+      - name: Pull Source Code and Backup File
         uses: actions/checkout@v4
 
-      - name: Initialize Java Virtual Machine
+      - name: Initialize Java Virtual Machine Env
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '8' # Changed from 17 to 8 to support Gradle 4.6
+          java-version: '17' # Reverted to 17 to support modern Android 34 build plugins
 
-      - name: Cache Build Configurations
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+      - name: Execute Cloud Decryption Test (Pre-Build Check)
+        run: |
+          echo "=== Starting Cloud Decryption Verification ==="
+          
+          # This compiles a dynamic mini-Java class on the fly using Passdroid's native crypto logic
+          cat << 'EOF' > CloudTest.java
+          import java.io.*;
+          import java.security.*;
+          import javax.crypto.*;
+          import javax.crypto.spec.*;
 
-      - name: Execute Gradle Build Assembly
+          public class CloudTest {
+              public static void main(String[] args) {
+                  if (args.length < 2) {
+                      System.out.println("[-] Missing parameters.");
+                      System.exit(1);
+                  }
+                  String filePath = args[0];
+                  String password = args[1];
+
+                  try {
+                      File file = new File(filePath);
+                      if (!file.exists()) {
+                          System.out.println("[-] Error: Could not find file at " + filePath);
+                          System.exit(1);
+                      }
+                      byte[] fileData = new byte[(int) file.length()];
+                      DataInputStream dis = new DataInputStream(new FileInputStream(file));
+                      dis.readFully(fileData);
+                      dis.close();
+
+                      // Passdroid structural parsing
+                      byte[] iv = new byte[16];
+                      System.arraycopy(fileData, 0, iv, 0, 16);
+                      byte[] ciphertext = new byte[fileData.length - 16];
+                      System.arraycopy(fileData, 16, ciphertext, 0, ciphertext.length);
+
+                      // Key generation logic standard to Passdroid source
+                      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                      byte[] keyBytes = digest.digest(password.getBytes("UTF-8"));
+                      SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+                      IvParameterSpec ivSpec = new IvParameterSpec(iv);
+
+                      Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                      cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+                      byte[] decryptedBytes = cipher.doFinal(ciphertext);
+
+                      String xmlResult = new String(decryptedBytes, "UTF-8");
+                      System.out.println("[--> SUCCESS] Decryption worked perfectly in the cloud!");
+                      System.out.println("[--> INFO] XML payload length: " + xmlResult.length() + " characters.");
+                      
+                      // Peek safely without leaking full credentials in public logs
+                      int printLength = Math.min(xmlResult.length(), 150);
+                      System.out.println("\n--- Structure Peek ---");
+                      System.out.println(xmlResult.substring(0, printLength) + "...");
+                      
+                  } catch (Exception e) {
+                      System.out.println("[!] Cryptographic Failure: Decryption failed.");
+                      System.out.println("Error details: " + e.getMessage());
+                      System.exit(1);
+                  }
+              }
+          }
+          EOF
+          
+          javac CloudTest.java
+          java CloudTest "${{ github.event.inputs.backup_filename }}" "${{ github.event.inputs.passdroid_password }}"
+
+      - name: Build the Android Project APK
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }} # Forces Gradle to map against the modern runtime engine smoothly
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
