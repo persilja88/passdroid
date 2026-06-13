@@ -1,0 +1,36 @@
+name: Android Build APK Engine
+
+on:
+  workflow_dispatch: # Allows manual button-click triggers
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Source Code
+        uses: actions/checkout@v4
+
+      - name: Initialize Java Virtual Machine Env
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Cache Build Configurations
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Execute Gradle Build Assembly
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Output Completed APK Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: passdroid-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
