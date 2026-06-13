@@ -10,11 +10,11 @@ jobs:
       - name: Pull Source Code
         uses: actions/checkout@v4
 
-      - name: Initialize Java 8 Environment
+      - name: Initialize Java 11 Environment
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '8'
+          java-version: '11'
 
       - name: Execute Gradle Build Assembly
         run: |
