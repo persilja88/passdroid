@@ -10,28 +10,15 @@ jobs:
       - name: Pull Source Code
         uses: actions/checkout@v4
 
-      - name: Initialize Java Virtual Machine Env
+      - name: Initialize Java 8 Environment
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
-
-      - name: Cache Build Configurations
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-
-      # This upgrades the wrapper so it doesn't crash on Java 17
-      - name: Force Upgrade Gradle Wrapper
-        run: |
-          chmod +x gradlew
-          ./gradlew wrapper --gradle-version 8.4 --distribution-type all
+          java-version: '8'
 
       - name: Execute Gradle Build Assembly
         run: |
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Output Completed APK Package
