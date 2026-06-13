@@ -1,15 +1,16 @@
-apply plugin: 'com.android.application'
-
+plugins {
+    id 'com.android.application'
+}
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
-
+    namespace "com.kodholken.passdroid"
+    compileSdk 34
     defaultConfig {
         applicationId "com.kodholken.passdroid"
-        minSdkVersion 24
-        targetSdkVersion 30
+        minSdk 24
+        targetSdk 34
+        versionCode 24
+        versionName "2.3.1"
     }
-
     buildTypes {
         release {
             minifyEnabled false
