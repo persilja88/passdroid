@@ -1,7 +1,7 @@
 name: Android Build APK Engine
 
 on:
-  workflow_dispatch: # Allows manual button-click triggers
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17' # Required for Android 34 build plugins
+          java-version: '17'
 
       - name: Cache Build Configurations
         uses: actions/cache@v4
@@ -24,9 +24,14 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
-      - name: Execute Gradle Build Assembly
+      # This upgrades the wrapper so it doesn't crash on Java 17
+      - name: Force Upgrade Gradle Wrapper
         run: |
           chmod +x gradlew
+          ./gradlew wrapper --gradle-version 8.4 --distribution-type all
+
+      - name: Execute Gradle Build Assembly
+        run: |
           ./gradlew assembleDebug
 
       - name: Output Completed APK Package
