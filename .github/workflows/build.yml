@@ -10,11 +10,11 @@ jobs:
       - name: Pull Source Code
         uses: actions/checkout@v4
 
-      - name: Initialize Java Virtual Machine Env
+      - name: Initialize Java Virtual Machine
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '8' # Changed from 17 to 8 to support Gradle 4.6
 
       - name: Cache Build Configurations
         uses: actions/cache@v4
