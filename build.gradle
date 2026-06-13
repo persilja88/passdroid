@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Downgraded from 8.x to 4.x to support Java 8 and Gradle 4.10.3
+        // Version 4.1.3 pairs flawlessly with Gradle 6.5
         classpath 'com.android.tools.build:gradle:4.1.3'
     }
 }
